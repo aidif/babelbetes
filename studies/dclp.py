@@ -142,6 +142,6 @@ class DCLP5(DCLP3):
         df_bolus.drop(columns=['DataDtTm', 'DataDtTm_adjusted'], inplace=True)
         df_basal.drop(columns=['DataDtTm', 'DataDtTm_adjusted'], inplace=True)
         
-        self._df_bolus = df_bolus
-        self._df_basal = df_basal
-        self._df_cgm = df_cgm
+        self._df_bolus = df_bolus.sort_values(by=['PtID','datetime'])
+        self._df_basal = df_basal.sort_values(by=['PtID','datetime'])
+        self._df_cgm = df_cgm.sort_values(by=['PtID','datetime'])
