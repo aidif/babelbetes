@@ -39,9 +39,10 @@ class PEDAP(StudyDataset):
         df_basal['DeviceDtTm'] = parse_flair_dates(df_basal['DeviceDtTm'])
         df_cgm['DeviceDtTm'] = parse_flair_dates(df_cgm['DeviceDtTm'])
 
-        self._df_bolus = df_bolus
-        self._df_basal = df_basal
-        self._df_cgm = df_cgm
+    
+        self._df_bolus = df_bolus.sort_values(by=['PtID','DeviceDtTm'])
+        self._df_basal = df_basal.sort_values(by=['PtID','DeviceDtTm'])
+        self._df_cgm = df_cgm.sort_values(by=['PtID','DeviceDtTm'])
 
     def _extract_basal_event_history(self):
         temp = self._df_basal.copy()
