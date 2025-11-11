@@ -95,6 +95,9 @@ class DCLP3(StudyDataset):
         _,_,i_drop = pandas_helper.get_duplicated_max_indexes(df_bolus,['PtID', 'DataDtTm', 'delivery_duration'], 'BolusAmount')
         df_bolus.drop(i_drop, inplace=True)
 
+        #drop zero boluses (there are sometimes a handful of records with 0 bolus amount left)
+        df_bolus = df_bolus[df_bolus.BolusAmount > 0]
+
         df_bolus = df_bolus[['PtID', 'DataDtTm', 'BolusAmount', 'delivery_duration']].rename(columns={'PtID': StudyDataset.COL_NAME_PATIENT_ID,
                                                                                               'DataDtTm': StudyDataset.COL_NAME_DATETIME,
                                                                                               'BolusAmount': StudyDataset.COL_NAME_BOLUS})
