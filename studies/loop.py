@@ -171,6 +171,9 @@ class Loop(StudyDataset):
         #drop duplicates
         ddf = ddf.map_partitions(lambda df: df.drop_duplicates(subset=['UTCDtTm']))
 
+        #replace NaN basal rates with zero (these are suspends)
+        ddf = ddf.map_partitions(lambda df: df.fillna({'Rate': 0}))
+
         # Convert to local datetime
         ddf = ddf.map_partitions(lambda df: df.merge(self._df_patient[['PtID', 'PtTimezoneOffset']], on='PtID', how='left'))
         ddf['UTCDtTm'] = ddf['UTCDtTm'] + dd.to_timedelta(ddf['PtTimezoneOffset'], unit='hour')
