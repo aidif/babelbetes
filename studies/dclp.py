@@ -70,7 +70,7 @@ class DCLP3(StudyDataset):
     def _extract_bolus_event_history(self):
         df_bolus = self._df_bolus.copy()
         
-        #Match standard and extended boluses (this will incorrectly match purely extended boluses to standard boluses)
+        #Match standard and extended boluses (this will incorrectly match some orphan extended boluses to "a" previous standard boluses)
         periods = df_bolus.groupby('PtID').apply(lambda x: find_periods(x,'BolusType','DataDtTm', lambda x: x == 'Standard',  lambda x: x == 'Extended', use_last_start_occurence=True))
         periods = periods[periods.apply(lambda x: len(x)>0)] 
         periods = pd.DataFrame(periods.explode(),columns=['Periods'])
@@ -80,9 +80,9 @@ class DCLP3(StudyDataset):
         
         #calculate extended bolus delivery durations
         #durations above 8 hours are not possible, therefore treated as extended boluses (no standard part)
-        #and assigned 55 minutes duration which is the observed meadian duration
+        #and assigned 80 minutes duration which is the observed median duration in PEDAP
         periods['delivery_duration'] = periods.time_end - periods.time_start
-        periods.loc[periods.delivery_duration>timedelta(hours=8), 'delivery_duration'] = timedelta(minutes=55)
+        periods.loc[periods.delivery_duration>timedelta(hours=8), 'delivery_duration'] = timedelta(minutes=80)
         df_bolus['delivery_duration'] = timedelta(0)
         #use .values here, otherwise will try to assign by index
         df_bolus.loc[periods.index_end, 'DataDtTm'] = (periods.time_end - periods.delivery_duration).values
