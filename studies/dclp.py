@@ -87,9 +87,9 @@ class DCLP3(StudyDataset):
         #use .values here, otherwise will try to assign by index
         df_bolus.loc[periods.index_end, 'DataDtTm'] = (periods.time_end - periods.delivery_duration).values
         df_bolus.loc[periods.index_end, 'delivery_duration'] = periods.delivery_duration.values
+        #df_bolus['delivery_duration'] = pd.to_timedelta(df_bolus.delivery_duration)
+        df_bolus = df_bolus.sort_values(by=['PtID','DataDtTm', 'delivery_duration'])
         
-        df_bolus['delivery_duration'] = pd.to_timedelta(df_bolus.delivery_duration)
-
         # Handling Duplicates
         # After accounting for extended boluses, there are a few duplicates left. We keep the maximum.
         _,_,i_drop = pandas_helper.get_duplicated_max_indexes(df_bolus,['PtID', 'DataDtTm', 'delivery_duration'], 'BolusAmount')
