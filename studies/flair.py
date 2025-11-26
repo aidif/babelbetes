@@ -108,7 +108,8 @@ class Flair(StudyDataset):
         
         #the extended boluses are reported upon completion
         df_bolus['DateTime'] = df_bolus['DateTime']-df_bolus['ExtendBolusDuration']
-
+        df_bolus = df_bolus.sort_values(by=['PtID','DateTime', 'ExtendBolusDuration'])
+        
         #drop zero boluses
         df_bolus = df_bolus[df_bolus.BolusDeliv != 0]
         

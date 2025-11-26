@@ -116,7 +116,9 @@ class ReplaceBG(StudyDataset):
         #the extended part is assigned as normal bolus but keeps its duration
         extended = df_bolus.dropna(subset=['Extended', 'Duration'],how='any').drop(columns=['Normal']).rename(columns={"Extended": 'Normal'})
         df_bolus = pd.concat([normal, extended], axis=0, ignore_index=True)
-        
+        #resort
+        df_bolus = df_bolus.sort_values(by=['PtID','datetime', 'Duration'])
+
         #reduce, rename, return
         df_bolus = df_bolus[['PtID', 'datetime', 'Normal', 'Duration']]
         df_bolus = df_bolus.rename(columns={'PtID': self.COL_NAME_PATIENT_ID,
