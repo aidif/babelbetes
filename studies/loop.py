@@ -90,18 +90,18 @@ class Loop(StudyDataset):
         # keep only CGM records (removes calibrations, etc.)
         ddf = ddf.loc[ddf.RecordType == 'CGM']
 
-        #drop duplicates
-        ddf = ddf.map_partitions(lambda df: df.drop_duplicates(subset=['UTCDtTm', 'CGMVal']))
-
         # Convert to mg/dL
         ddf['CGMVal'] = ddf.CGMVal * 18.018
-
-        #sort
-        ddf = ddf.map_partitions(lambda df: df.sort_values('UTCDtTm'))
 
         # Convert to local datetime
         ddf = ddf.map_partitions(lambda df: df.merge(self._df_patient[['PtID', 'PtTimezoneOffset']], on='PtID', how='left'))
         ddf['UTCDtTm'] = ddf['UTCDtTm'] + dd.to_timedelta(ddf['PtTimezoneOffset'], unit='hour')
+
+        #drop duplicates (we see only insignificant differences in duplicates, likely due to rounding)
+        ddf = ddf.map_partitions(lambda df: df.drop_duplicates(subset=['UTCDtTm']))
+
+        #sort
+        ddf = ddf.map_partitions(lambda df: df.sort_values('UTCDtTm'))
 
         #clip CGM data to 40-400 mg/dL, drop outliers (see dedicated analysis)
         ddf = ddf[ddf.CGMVal > 38]
