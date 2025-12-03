@@ -148,14 +148,15 @@ class ReplaceBG(StudyDataset):
     def _extract_cgm_history(self):
         df_cgm = self._df_cgm.copy()
 
-        df_cgm = df_cgm.drop_duplicates(subset=['PtID', 'datetime','RecordType','GlucoseValue'])
-
         #drop Calibrations
         df_cgm = df_cgm.loc[df_cgm.RecordType == 'CGM']
 
         #handle out of range values
         df_cgm.replace({'GlucoseValue': {39:40, 401:400}},inplace=True)
-        
+
+        #drop temporal duplicates
+        df_cgm = df_cgm.drop_duplicates(subset=['PtID', 'datetime'])
+
         #reduce, rename, return
         df_cgm = df_cgm.rename(columns={'PtID': self.COL_NAME_PATIENT_ID,
                                         'datetime': self.COL_NAME_DATETIME,

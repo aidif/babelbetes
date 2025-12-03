@@ -162,6 +162,8 @@ class Flair(StudyDataset):
         df_cgm = df_cgm[~df_cgm.Unusuable]
         #drop duplicates
         df_cgm = df_cgm.drop_duplicates(subset=['PtID', 'DateTime'])
+        #sort
+        df_cgm = df_cgm.sort_values(['PtID', 'DateTime'])
         #reduce, rename return
         df_cgm = df_cgm[['PtID', 'DateTime', 'CGM']].copy()
         df_cgm = df_cgm.rename(columns={'PtID': self.COL_NAME_PATIENT_ID, 
