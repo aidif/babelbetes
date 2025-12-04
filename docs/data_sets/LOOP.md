@@ -203,8 +203,9 @@ We found that sometimes boluses are drastically different. We don't know why tha
 ### Dual wave Boluses
 We know there are some dual wave and extended boluses. Since Loop does not support these natively, these were likey initiated by the user from the pump or during open loop mode.
 
- - 0.43% of boluses are extended
- - These always have a duration
+ - 0.43% of boluses are extended (then the Extended Part, otherwise this is set to NaN)
+ - `square` boluses have no Normal Part (set to NaN). These must be dropped.
+ - Some 108 extended boluses have 0 duration. These were probably stopped early and the bolus is almost always zero. We drop these too, otherwise they become temporal duplicates with the Normal part.
 
 #### Bolus Duration
 From the glossary we know that the duration is either in ms or minutes.
