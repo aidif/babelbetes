@@ -128,21 +128,24 @@ class Loop(StudyDataset):
                                 parse_dates=['UTCDtTm'], date_format='%Y-%m-%d %H:%M:%S',
                                 usecols=['PtID', 'UTCDtTm', 'Normal', 'Extended', 'Duration'])
         
-        #drop duplicates
-        df = df.drop_duplicates(subset=['PtID', 'UTCDtTm'])
-        
         # Convert to local datetime
         df = df.merge(self._df_patient[['PtID', 'PtTimezoneOffset']], on='PtID', how='left')
         df['UTCDtTm'] = df.UTCDtTm + pd.to_timedelta(df.PtTimezoneOffset, unit='hour')
 
-        #split extended and normal boluses
-        #for normal boluses the delivery duration = 0
-        normal = df.drop(columns=['Extended'])
+        #drop duplicates
+        df = df.drop_duplicates(subset=['PtID', 'UTCDtTm'])
+
+        # Split extended and normal boluses
+        # for normal boluses the delivery duration = 0,
+        # some normal boluses are NaN (relating to square boluses (no immediate part)) and should be dropped
+        normal = df.drop(columns=['Extended']).dropna(subset='Normal')
         normal['Duration'] = pd.to_timedelta(0, unit='millisecond')
 
         #extended boluses have a delivery duration
         extended = df.drop(columns=['Normal']).dropna(subset=['Extended']).rename(columns={"Extended": "Normal"})
         extended['Duration'] = pd.to_timedelta(extended.Duration, unit='millisecond')
+        # Some 108 extended durations are zero, probably indicating a cancelled bolus. These would become duplicates to the normal boluses part.
+        extended = extended.loc[extended.Duration > pd.to_timedelta(0, unit='millisecond')]
         df = pd.concat([normal, extended], axis=0).sort_values('UTCDtTm')
         
         # Reduce, Rename, Return
